@@ -38,7 +38,7 @@ export class AppService {
     }
 
     const randomPokemonIndexes = Array.from({ length: rollFoundPokemon }, () =>
-      Math.floor(Math.random() * pokemonList.length),
+      Math.floor(Math.random() * pokemonList.length - 1),
     );
 
     const foundPokemons = pokemonList.filter((_, index) =>
@@ -76,9 +76,7 @@ export class AppService {
 
     const pokemonList = await pokemonQueryResult.json();
 
-    console.log(`${pokemonList}`);
-
-    return pokemonList;
+    return pokemonList.results;
   }
 
   private async getPokemonData({
