@@ -1,7 +1,7 @@
 import { Body, Controller, Get, ParseIntPipe, Post } from '@nestjs/common';
 import { AppService } from './app.service';
-import { PokemonInfoResponse } from './models/pokemon';
 import CatchPokemonDto from './models/catch-pokemon.dto';
+import { PokemonInfoResponse } from './models/pokemon';
 
 @Controller()
 export class AppController {
@@ -17,6 +17,7 @@ export class AppController {
   async catchPokemon(@Body() { id }: CatchPokemonDto) {
     this.appService.catchPokemon(id);
   }
+
   @Post('catch-id')
   async catchPokemonIdOnBodyOnly(@Body('id', ParseIntPipe) id: number) {
     this.appService.catchPokemon(id);

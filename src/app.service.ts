@@ -1,9 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import {
-  PokemonInfo,
-  PokemonInfoResponse,
-  PokemonQueryData,
-} from './models/pokemon';
+import { PokemonInfo, PokemonQueryData } from './types/pokeapi';
+import { PokemonInfoResponse } from './models/pokemon';
 
 @Injectable()
 export class AppService {
