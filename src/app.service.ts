@@ -65,6 +65,25 @@ export class AppService {
     }
   }
 
+  async catchPokemon(id: number): Promise<void> {
+    let pokemonData = null;
+    try {
+      pokemonData = await this.getPokemonData({
+        name: '',
+        url: `https://pokeapi.co/api/v2/pokemon/${id}`,
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    if (!pokemonData) {
+      throw new HttpException('Pokemon not found', HttpStatus.NOT_FOUND);
+    }
+
+    //TODO: save pokemon to database
+    console.log(`Caught ${pokemonData.name}!`);
+  }
+
   private async getPokemonList(): Promise<Array<PokemonQueryData>> {
     const pokemonQueryResult = await fetch(
       'https://pokeapi.co/api/v2/pokemon?limit=151',
