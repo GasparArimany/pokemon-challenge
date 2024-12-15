@@ -37,9 +37,13 @@ create table trainer(id integer primary key autoincrement, name text unique on c
 insert into trainer (name) values ('Ash Ketchum');
 
 create table owned_pokemon(
-    id integer primary key, 
-    name text unique on conflict fail, 
+    -- TODO: add nickname field
+    pokemon_name text not null, 
+    pokemon_id integer not null,
     types text not null, -- TODO: change to integer references type(id)
     moves text not null, -- TODO: change to integer references move(id)
-    trainer_owner integer not null references trainer(id)
+    trainer_owner integer not null references trainer(id),
+    primary key (pokemon_id, trainer_owner)
 );
+
+CREATE INDEX idx_owned_pokemon_trainer_name ON owned_pokemon(pokemon_name, trainer_owner);

@@ -1,9 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PokemonInfo, PokemonQueryData } from './types/pokeapi';
-import { PokemonInfoResponse } from './models/pokemon';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PokemonInfoResponse } from 'src/dtos/search-nearby-pokemon.dto';
+import { OwnedPokemon } from 'src/models/pokemon.entity';
+import { PokemonInfo, PokemonQueryData } from 'src/types/pokeapi';
+import { Repository } from 'typeorm';
 
 @Injectable()
-export class AppService {
+export class PokemonService {
+  constructor(
+    @InjectRepository(OwnedPokemon)
+    private pokemonRepo: Repository<OwnedPokemon>,
+  ) {}
+
   async searchNearbyPokemon(): Promise<PokemonInfoResponse[]> {
     // pick random number between 0 and 5
     const rollFoundPokemon = Math.floor(Math.random() * 5);
@@ -77,9 +85,18 @@ export class AppService {
       throw new HttpException('Pokemon not found', HttpStatus.NOT_FOUND);
     }
 
-    //TODO: save pokemon to database
+    this.pokemonRepo.save({
+      pokemon_id: pokemonData.id,
+      pokemon_name: pokemonData.name,
+      types: pokemonData.types.map(({ type }) => type.name),
+      moves: pokemonData.moves.map(({ move }) => move.name),
+      // TODO, this should be the id of the logged in trainer
+      trainer_owner: 1,
+    });
     console.log(`Caught ${pokemonData.name}!`);
   }
+
+  // TODO: getPokemonList and getPokemonData should be move to a service to encapsulate communicating with the pokeapi
 
   private async getPokemonList(): Promise<Array<PokemonQueryData>> {
     const pokemonQueryResult = await fetch(
