@@ -66,6 +66,7 @@ export class PokemonService {
       });
     } catch (error) {
       console.log(error);
+      // TODO: don't expose error message to the client
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -75,7 +76,7 @@ export class PokemonService {
     try {
       pokemonData = await this.getPokemonData({
         name: '',
-        url: `https://pokeapi.co/api/v2/pokemon/${id}`,
+        url: `${process.env.POKE_API_URL}/${id}`,
       });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -96,11 +97,32 @@ export class PokemonService {
     console.log(`Caught ${pokemonData.name}!`);
   }
 
-  // TODO: getPokemonList and getPokemonData should be move to a service to encapsulate communicating with the pokeapi
+  async evolvePokemon(id: number): Promise<void> {
+    const pokemon = await this.pokemonRepo.findOne({
+      where: { pokemon_id: id, trainer_owner: 1 },
+    });
 
+    if (!pokemon) {
+      throw new HttpException('Pokemon not found', HttpStatus.NOT_FOUND);
+    }
+
+    // TODO add try catch block
+    const pokemonData = await this.getPokemonData({
+      name: '',
+      url: `${process.env.POKE_API_URL}/${id}`,
+    });
+
+    if (!pokemonData) {
+      throw new HttpException('Pokemon not found', HttpStatus.NOT_FOUND);
+    }
+
+    const evolvedPokemon = await this.getPokemonEvolutions(pokemonData.id);
+  }
+
+  // TODO: getPokemonList and getPokemonData should be move to a service to encapsulate communicating with the pokeapi
   private async getPokemonList(): Promise<Array<PokemonQueryData>> {
     const pokemonQueryResult = await fetch(
-      'https://pokeapi.co/api/v2/pokemon?limit=151',
+      `${process.env.POKE_API_URL}?limit=151`,
     );
 
     if (!pokemonQueryResult.ok) {
@@ -119,6 +141,16 @@ export class PokemonService {
     const pokemonData = await fetch(url);
     if (!pokemonData.ok) {
       throw new Error(`Couldn't fetch pokemon ${name}`);
+    }
+    return pokemonData.json();
+  }
+
+  private async getPokemonEvolutions(id: number): Promise<unknown> {
+    const pokemonData = await fetch(
+      `${process.env.POKE_API_URL}-species/${id}`,
+    );
+    if (!pokemonData.ok) {
+      throw new Error(`Couldn't fetch pokemon evolutions`);
     }
     return pokemonData.json();
   }

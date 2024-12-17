@@ -7,12 +7,13 @@ import { PokemonService } from 'src/services/pokemon.service';
 export class PokemonController {
   constructor(private readonly pokemonService: PokemonService) {}
 
+  // TODO search using limit and offset. validate inputs?
   @Get('search')
   async searchNearbyPokemon(): Promise<PokemonInfoResponse[]> {
     return this.pokemonService.searchNearbyPokemon();
   }
 
-  //TODO: improve body dto to recieve either name or id. replicate in different handler with simple types
+  //TODO: improve body dto to receive either name or id. replicate in different handler with simple types
   @Post('catch')
   async catchPokemon(@Body() { id }: CatchPokemonDto) {
     this.pokemonService.catchPokemon(id);
