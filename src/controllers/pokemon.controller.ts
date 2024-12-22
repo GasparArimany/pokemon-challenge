@@ -1,4 +1,4 @@
-import { Body, Controller, Get, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, ParseIntPipe, Post, Put } from '@nestjs/common';
 import CatchPokemonDto from 'src/dtos/catch-pokemon.dto';
 import { PokemonInfoResponse } from 'src/dtos/search-nearby-pokemon.dto';
 import { PokemonService } from 'src/services/pokemon.service';
@@ -16,11 +16,16 @@ export class PokemonController {
   //TODO: improve body dto to receive either name or id. replicate in different handler with simple types
   @Post('catch')
   async catchPokemon(@Body() { id }: CatchPokemonDto) {
-    this.pokemonService.catchPokemon(id);
+    return this.pokemonService.catchPokemon(id);
   }
 
   @Post('catch-id')
   async catchPokemonIdOnBodyOnly(@Body('id', ParseIntPipe) id: number) {
     this.pokemonService.catchPokemon(id);
+  }
+
+  @Put('evolve')
+  async evolvePokemon(@Body() { id }: CatchPokemonDto) {
+    return this.pokemonService.evolvePokemon(id);
   }
 }

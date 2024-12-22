@@ -1,15 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PokemonInfoResponse } from 'src/dtos/search-nearby-pokemon.dto';
-import { OwnedPokemon } from 'src/models/pokemon.entity';
+import { ChosenPokemon } from 'src/models/pokemon.entity';
 import { PokemonInfo, PokemonQueryData } from 'src/types/pokeapi';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class PokemonService {
   constructor(
-    @InjectRepository(OwnedPokemon)
-    private pokemonRepo: Repository<OwnedPokemon>,
+    @InjectRepository(ChosenPokemon)
+    private pokemonRepo: Repository<ChosenPokemon>,
   ) {}
 
   async searchNearbyPokemon(): Promise<PokemonInfoResponse[]> {
@@ -71,7 +71,7 @@ export class PokemonService {
     }
   }
 
-  async catchPokemon(id: number): Promise<void> {
+  async catchPokemon(id: number): Promise<ChosenPokemon> {
     let pokemonData = null;
     try {
       pokemonData = await this.getPokemonData({
@@ -85,21 +85,27 @@ export class PokemonService {
     if (!pokemonData) {
       throw new HttpException('Pokemon not found', HttpStatus.NOT_FOUND);
     }
+    try {
+      const savedPkm = this.pokemonRepo.save({
+        pokemon_id: pokemonData.id,
+        pokemon_name: pokemonData.name,
+        types: pokemonData.types.map(({ type }) => type.name),
+        moves: pokemonData.moves.map(({ move }) => move.name),
+        // TODO, this should be the id of the logged in trainer
+        trainer_id: 1,
+      });
+      console.log(`Caught ${pokemonData.name}!`);
 
-    this.pokemonRepo.save({
-      pokemon_id: pokemonData.id,
-      pokemon_name: pokemonData.name,
-      types: pokemonData.types.map(({ type }) => type.name),
-      moves: pokemonData.moves.map(({ move }) => move.name),
-      // TODO, this should be the id of the logged in trainer
-      trainer_owner: 1,
-    });
-    console.log(`Caught ${pokemonData.name}!`);
+      return savedPkm;
+    } catch (error) {
+      // TODO: handle?
+      console.log(error);
+    }
   }
 
   async evolvePokemon(id: number): Promise<void> {
     const pokemon = await this.pokemonRepo.findOne({
-      where: { pokemon_id: id, trainer_owner: 1 },
+      where: { pokemon_id: id, trainer_id: 1 },
     });
 
     if (!pokemon) {
@@ -117,6 +123,8 @@ export class PokemonService {
     }
 
     const evolvedPokemon = await this.getPokemonEvolutions(pokemonData.id);
+
+    console.log(evolvedPokemon);
   }
 
   // TODO: getPokemonList and getPokemonData should be move to a service to encapsulate communicating with the pokeapi

@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { OwnedPokemon } from './pokemon.entity';
+import { ChosenPokemon } from './pokemon.entity';
 
 @Entity()
 export default class Trainer {
@@ -9,6 +9,6 @@ export default class Trainer {
   @Column()
   name: string;
 
-  @OneToMany(() => OwnedPokemon, (pkm) => pkm.trainer_owner)
-  ownedPokemons: OwnedPokemon[];
+  @OneToMany(() => ChosenPokemon, (pkm) => pkm.trainer_id)
+  chosenPokemons: ChosenPokemon[];
 }

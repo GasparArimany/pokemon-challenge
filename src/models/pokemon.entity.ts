@@ -1,12 +1,15 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import Trainer from './trainer.entity';
 
 export type PokemonType = string & { __brand: 'pokemonType' };
 export type Move = string & { __brand: 'move' };
 
 @Entity()
-export class OwnedPokemon {
-  @PrimaryColumn()
+export class ChosenPokemon {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   pokemon_id: number;
 
   @Column()
@@ -19,6 +22,5 @@ export class OwnedPokemon {
   moves: Array<Move>;
 
   @ManyToOne(() => Trainer, (trainer) => trainer.id)
-  @PrimaryColumn()
-  trainer_owner: number;
+  trainer_id: number;
 }
